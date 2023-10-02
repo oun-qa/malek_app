@@ -11,13 +11,13 @@ class LibraryTransaction(Document):
         if self.type == "Issue":
             self.validate_issue()
             article = frappe.get_doc("Article", self.article)
-            article.status == "Issued"
+            article.status = "Issued"
             article.save()
 
         if self.type == "Return":
             self.validate_return()
             article = frappe.get_doc("Article", self.article)
-            article.status == "Available"
+            article.status = "Available"
             article.save()
 
     def validate_issue(self):
