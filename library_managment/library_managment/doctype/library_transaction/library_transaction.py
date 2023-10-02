@@ -24,6 +24,13 @@ class LibraryTransaction(Document):
         self.validate_membership()
         article = frappe.get_doc("Article", self.article)
 
+        if article.status == "Issued" and self.already_issued_by_this_member():
+            frappe.throw("Article is already issued by this member")
+        elif article.status == "Issued":
+            frappe.throw("Article is already issued by another member")
+
+    def already_issued_by_this_member(self):
+        article = frappe.get_doc("Article", self.article)
         existing_article = frappe.db.get_list('Library Transaction', filters={
             "article": self.article,
             "library_member": self.library_member,
@@ -31,12 +38,15 @@ class LibraryTransaction(Document):
         }, fields=["article"])
 
         if article.status == "Issued" and len(existing_article) % 2 != 0:
-            frappe.throw("Article is already issued by this member")
-        elif article.status == "Issued":
-            frappe.throw("Article is already issued by another member")
+            return True
+        return False
 
     def validate_return(self):
         article = frappe.get_doc("Article", self.article)
+
+        if article.status == "Issued" and not self.already_issued_by_this_member():
+            frappe.throw("Only the member who issued this article can return it")
+
         if article.status == "Available":
             frappe.throw("Article cannot be returned without being issued first")
 
