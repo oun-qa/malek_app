@@ -24,7 +24,15 @@ class LibraryTransaction(Document):
         self.validate_membership()
         article = frappe.get_doc("Article", self.article)
 
-        if article.status == "Issued":
+        existing_article = frappe.db.exists("Library Transaction", {
+            "article": article,
+            "library_member": self.library_member,
+            "docstatus": DocStatus.submitted(),
+        })
+
+        if article.status == "Issued" and existing_article:
+            frappe.throw("Article is already issued by this member")
+        elif article.status == "Issued":
             frappe.throw("Article is already issued by another member")
 
     def validate_return(self):
@@ -34,7 +42,7 @@ class LibraryTransaction(Document):
 
     def validate_maximum_limit(self):
         max_articles = frappe.db.get_single_value("Library Settings", "max_articles")
-        count = frappe.db.count("Library Transaction",{
+        count = frappe.db.count("Library Transaction", {
             "library_member": self.library_member,
             "type": "Issue",
             "docstatus": DocStatus.submitted(),
