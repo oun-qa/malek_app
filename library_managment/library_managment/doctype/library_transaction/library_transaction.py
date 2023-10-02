@@ -25,7 +25,7 @@ class LibraryTransaction(Document):
         article = frappe.get_doc("Article", self.article)
 
         existing_article = frappe.db.exists("Library Transaction", {
-            "article": article,
+            "article": self.article,
             "library_member": self.library_member,
             "docstatus": DocStatus.submitted(),
         })
