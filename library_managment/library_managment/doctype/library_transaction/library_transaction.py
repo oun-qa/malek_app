@@ -10,7 +10,6 @@ class LibraryTransaction(Document):
     def before_submit(self):
         if self.type == "Issue":
             self.validate_issue()
-            self.validate_maximum_limit()
             article = frappe.get_doc("Article", self.article)
             article.status == "Issued"
             article.save()
