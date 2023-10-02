@@ -24,13 +24,13 @@ class LibraryTransaction(Document):
         self.validate_membership()
         article = frappe.get_doc("Article", self.article)
 
-        existing_article = frappe.db.exists("Library Transaction", {
+        existing_article = frappe.db.get_list('Library Transaction', filters={
             "article": self.article,
             "library_member": self.library_member,
             "docstatus": DocStatus.submitted(),
-        })
+        }, fields=["article"])
 
-        if article.status == "Issued" and existing_article:
+        if article.status == "Issued" and len(existing_article) % 2 != 0:
             frappe.throw("Article is already issued by this member")
         elif article.status == "Issued":
             frappe.throw("Article is already issued by another member")
