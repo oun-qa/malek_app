@@ -26,6 +26,7 @@ def execute(filters=None):
             LT.article = A.name 
         WHERE
             A.status = 'Issued'
+			AND LT.type = "Issue"
             AND LT.creation = (
                 SELECT MAX(subLT.creation)
                 FROM `tabLibrary Transaction` subLT
