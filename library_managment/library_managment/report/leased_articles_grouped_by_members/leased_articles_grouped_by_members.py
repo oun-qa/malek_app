@@ -30,7 +30,7 @@ def execute(filters=None):
             AND LT.creation = (
                 SELECT MAX(subLT.creation)
                 FROM `tabLibrary Transaction` subLT
-                WHERE subLT.library_member = LT.library_member
+                WHERE subLT.article = A.name
                 AND subLT.type = "Issue"
             )
         """, as_dict=True)
