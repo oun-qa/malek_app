@@ -28,10 +28,13 @@ def execute(filters=None):
             A.status = 'Issued'
 			AND LT.type = "Issue"
             AND LT.creation = (
-                SELECT MAX(subLT.creation)
+                SELECT subLT.creation
                 FROM `tabLibrary Transaction` subLT
                 WHERE subLT.article = A.name
                 AND subLT.type = "Issue"
+                AND subLT.library_member = LT.library_member
+                ORDER BY subLT.creation ASC
+                LIMIT 1 OFFSET 1  -- Offset to get the second record
             )
         """, as_dict=True)
 
