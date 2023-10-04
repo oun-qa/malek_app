@@ -26,6 +26,12 @@ def execute(filters=None):
             LT.article = A.name 
         WHERE
             A.status = 'Issued'
+            AND LT.creation = (
+                SELECT MAX(subLT.creation)
+                FROM `tabLibrary Transaction` subLT
+                WHERE subLT.library_member = LT.library_member
+                AND subLT.type = "Issue"
+            )
         """, as_dict=True)
 
     for article in articles:
