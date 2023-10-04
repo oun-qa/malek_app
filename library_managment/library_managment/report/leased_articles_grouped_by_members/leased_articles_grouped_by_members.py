@@ -8,12 +8,10 @@ def execute(filters=None):
     columns = [
         {"label": "Library Member", "fieldname": "library_member", "fieldtype": "Data"},
         {"label": "Article", "fieldname": "article_name", "fieldtype": "Data"},
-        # Add other columns as needed
     ]
 
     data = []
 
-    # Fetch leased articles with member names
     articles = frappe.db.sql("""
         SELECT
             LT.library_member,
@@ -28,13 +26,10 @@ def execute(filters=None):
             A.status = 'Issued'
 			AND LT.type = "Issue"
             AND LT.creation = (
-                SELECT subLT.creation
+                SELECT MAX(subLT.creation)
                 FROM `tabLibrary Transaction` subLT
                 WHERE subLT.article = A.name
                 AND subLT.type = "Issue"
-                AND subLT.library_member = LT.library_member
-                ORDER BY subLT.creation ASC
-                LIMIT 1 OFFSET 1  -- Offset to get the second record
             )
         """, as_dict=True)
 
@@ -42,7 +37,6 @@ def execute(filters=None):
         data.append({
             "library_member": article["library_member"],
             "article_name": article["article_name"],
-            # Add other data as needed
         })
 
     return columns, data
