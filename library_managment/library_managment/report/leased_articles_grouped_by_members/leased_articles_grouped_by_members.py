@@ -23,7 +23,7 @@ def execute(filters=None):
         INNER JOIN
             `tabArticle` A
         ON
-            LT.article_id = A.name 
+            LT.article = A.name 
         WHERE
             A.status = 'Issued'
         """, as_dict=True)
