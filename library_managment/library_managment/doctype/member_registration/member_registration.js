@@ -6,11 +6,11 @@ frappe.ui.form.on('Member Registration', {
 		const isLibrarian = frappe.user.has_role('Librarian');
 
 		if (isLibrarian) {
-			frm.add_custom_button('Approve Membership', () => {
+			frm.add_custom_button('Approve Member', () => {
 				frm.set_value('status', 'Approved');
 				frm.save().then(() => {
                     frappe.call({
-                        method: 'member_registration.member_registration.create_library_membership',
+                        method: 'member_registration.member_registration.create_library_member',
                         args: {
                             member_registration: frm.doc.name
                         },
@@ -23,7 +23,7 @@ frappe.ui.form.on('Member Registration', {
                 });
             });
 			
-			frm.add_custom_button('Reject Membership', () => {
+			frm.add_custom_button('Reject Member', () => {
 				frm.set_value('status', 'Rejected');
 				frm.save();
 			});

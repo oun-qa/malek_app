@@ -9,16 +9,16 @@ class MemberRegistration(Document):
 
 
 @frappe.whitelist()
-def create_library_membership(member_registration):
+def create_library_member(member_registration):
     member_registration_doc = frappe.get_doc('Member Registration', member_registration)
 
-    library_membership_doc = frappe.new_doc('Library Membership')
-    library_membership_doc.library_member = member_registration_doc.member_name
-    library_membership_doc.first_name = member_registration_doc.first_name
-    library_membership_doc.last_name = member_registration_doc.last_name
-    library_membership_doc.email_address = member_registration_doc.email_address
-    library_membership_doc.phone = member_registration_doc.phone
+    library_member_doc = frappe.new_doc('Library Member')
+    library_member_doc.library_member = member_registration_doc.member_name
+    library_member_doc.first_name = member_registration_doc.first_name
+    library_member_doc.last_name = member_registration_doc.last_name
+    library_member_doc.email_address = member_registration_doc.email_address
+    library_member_doc.phone = member_registration_doc.phone
 
-    library_membership_doc.insert(ignore_permissions=True)
+    library_member_doc.insert(ignore_permissions=True)
 
-    return library_membership_doc
+    return library_member_doc
