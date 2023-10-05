@@ -1,8 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "LM.#####",
- "creation": "2023-10-01 12:23:03.982562",
+ "creation": "2023-10-05 23:33:28.494922",
  "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,10 +9,9 @@
  "field_order": [
   "first_name",
   "last_name",
-  "full_name",
   "email_address",
   "phone",
-  "amended_from"
+  "status"
  ],
  "fields": [
   {
@@ -29,12 +27,6 @@
    "label": "Last Name"
   },
   {
-   "fieldname": "full_name",
-   "fieldtype": "Data",
-   "label": "Full Name",
-   "read_only": 1
-  },
-  {
    "fieldname": "email_address",
    "fieldtype": "Data",
    "label": "Email Address",
@@ -47,22 +39,19 @@
    "options": "Phone"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Library Member",
-   "print_hide": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Under Review\nApproved\nRejected",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-05 23:36:11.244679",
+ "modified": "2023-10-05 23:40:46.258505",
  "modified_by": "Administrator",
  "module": "Library Managment",
- "name": "Library Member",
- "naming_rule": "Expression (old style)",
+ "name": "Member Registration",
  "owner": "Administrator",
  "permissions": [
   {
@@ -74,6 +63,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Librarian",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System user",
    "share": 1,
    "write": 1
   }
