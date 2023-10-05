@@ -1,6 +1,7 @@
 // Copyright (c) 2023, Malek and contributors
 // For license information, please see license.txt
 
+
 frappe.ui.form.on('Member Registration', {
 	refresh: function(frm) {
 		const isLibrarian = frappe.user.has_role('Librarian');
@@ -10,7 +11,7 @@ frappe.ui.form.on('Member Registration', {
 				frm.set_value('status', 'Approved');
 				frm.save().then(() => {
                     frappe.call({
-                        method: 'scripts.create_library_member.create_library_member',
+                        method: 'malek_app.member_managment.doctype.member_registration.member_registration.create_library_member',
                         args: {
                             member_registration: frm.doc.name
                         },
