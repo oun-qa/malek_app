@@ -28,4 +28,4 @@ frappe.ui.form.on('Member Registration', {
 				frm.save();
 			});
 		}}
-	})
+	})	

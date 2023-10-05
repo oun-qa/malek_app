@@ -1,7 +1,6 @@
 import frappe
 
-
-@frappe.whitelist()
+# @frappe.whitelist()
 def create_library_member(member_registration):
     member_registration_doc = frappe.get_doc('Member Registration', member_registration)
 
