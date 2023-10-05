@@ -11,7 +11,7 @@ frappe.ui.form.on('Member Registration', {
 				frm.set_value('status', 'Approved');
 				frm.save().then(() => {
                     frappe.call({
-                        method: 'malek_app.member_managment.doctype.member_registration.member_registration.create_library_member',
+                        method: 'library_managment.library_managment.doctype.member_registration.member_registration.create_library_member',
                         args: {
                             member_registration: frm.doc.name
                         },
