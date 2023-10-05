@@ -10,7 +10,7 @@ frappe.ui.form.on('Member Registration', {
 				frm.set_value('status', 'Approved');
 				frm.save().then(() => {
                     frappe.call({
-                        method: 'library_managment.doctype.member_registration.member_registration.create_library_member',
+                        method: 'member_registration.member_registration.create_library_member',
                         args: {
                             member_registration: frm.doc.name
                         },
