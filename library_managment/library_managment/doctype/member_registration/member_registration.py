@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from scripts.check_member_existence import check_member_existence
+from member_registration.scripts.check_member_existence import check_member_existence
 
 class MemberRegistration(Document):
 	
