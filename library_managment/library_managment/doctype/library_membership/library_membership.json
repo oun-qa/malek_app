@@ -39,7 +39,8 @@
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -60,7 +61,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-01 15:14:51.021945",
+ "modified": "2023-10-02 12:12:20.864461",
  "modified_by": "Administrator",
  "module": "Library Managment",
  "name": "Library Membership",
