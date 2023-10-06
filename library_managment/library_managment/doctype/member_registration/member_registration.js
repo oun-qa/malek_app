@@ -25,11 +25,14 @@ frappe.ui.form.on('Member Registration', {
             });
 			
 			frm.add_custom_button('Reject Member', () => {
-				frm.set_value('status', 'Rejected');
-				frm.save();
+                if (frm.doc.status === 'Approved'){
+                    frappe.throw("This Request is approved, you can delete the member from library members interface")
+                } else{
+                    frm.set_value('status', 'Rejected');
+                    frm.save();
+                } 
 			});
 		}}
 	})	
 
 
-    

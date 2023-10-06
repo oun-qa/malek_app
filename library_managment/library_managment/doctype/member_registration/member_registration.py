@@ -8,7 +8,6 @@ from library_managment.library_managment.doctype.member_registration.scripts.che
 class MemberRegistration(Document):
 	
     def before_save(self):
-        # frappe.msg(f"{self.first_name}, {self.last_name}, {self.email_address}")
         if check_member_existence(self.first_name, self.last_name, self.email_address):
             frappe.throw("This person is already a member in the library")
 
