@@ -13,3 +13,4 @@ def check_member_existence(first_name, last_name, email_address):
         )
         if exists:
             return True
+        return False
