@@ -7,7 +7,7 @@ frappe.ui.form.on('Member Registration', {
 		const isLibrarian = frappe.user.has_role('Librarian');
 
 		if (isLibrarian) {
-			frm.add_custom_button('Approve Member', () => {
+			frm.add_custom_button('Approve Request', () => {
 				frm.set_value('status', 'Approved');
 				frm.save().then(() => {
                     frappe.call({
@@ -22,16 +22,16 @@ frappe.ui.form.on('Member Registration', {
                         }
                     });
                 });
-            });
+            }, 'Approve', 'btn-approve');
 			
-			frm.add_custom_button('Reject Member', () => {
+			frm.add_custom_button('Reject Request', () => {
                 if (frm.doc.status === 'Approved'){
                     frappe.throw("This Request is approved, you can delete the member from library members list")
                 } else{
                     frm.set_value('status', 'Rejected');
                     frm.save();
                 } 
-			});
+			}, 'Reject', 'btn-reject');
 		}}
 	})	
 

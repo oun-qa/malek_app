@@ -1,0 +1,9 @@
+.btn-approve {
+    background-color: green; 
+    color: white;
+}
+
+.btn-reject {
+    background-color: red;
+    color: white;
+}
