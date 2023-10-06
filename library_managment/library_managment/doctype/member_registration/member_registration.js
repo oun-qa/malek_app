@@ -26,7 +26,7 @@ frappe.ui.form.on('Member Registration', {
 			
 			frm.add_custom_button('Reject Member', () => {
                 if (frm.doc.status === 'Approved'){
-                    frappe.throw("This Request is approved, you can delete the member from library members interface")
+                    frappe.throw("This Request is approved, you can delete the member from library members list")
                 } else{
                     frm.set_value('status', 'Rejected');
                     frm.save();
