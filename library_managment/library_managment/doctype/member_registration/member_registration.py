@@ -11,3 +11,6 @@ class MemberRegistration(Document):
         if check_member_existence(self.first_name, self.last_name, self.email_address):
             frappe.throw("This person is already a member in the library")
 
+    def after_save(self):
+        frappe.msgprint("Your registration request sent successfully.")
+

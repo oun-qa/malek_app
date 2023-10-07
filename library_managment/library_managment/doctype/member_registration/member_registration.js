@@ -34,5 +34,3 @@ frappe.ui.form.on('Member Registration', {
 			});
 		}}
 	})	
-
-
