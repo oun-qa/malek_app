@@ -26,7 +26,7 @@ frappe.ui.form.on('Member Registration', {
                         });
                     });
                 }
-            });
+            }, actions);
 			
 			frm.add_custom_button('Reject Request', () => {
                 if (frm.doc.status === 'Approved'){
@@ -35,6 +35,6 @@ frappe.ui.form.on('Member Registration', {
                     frm.set_value('status', 'Rejected');
                     frm.save();
                 } 
-			});
+			}, actions);
 		}}
 	})	
