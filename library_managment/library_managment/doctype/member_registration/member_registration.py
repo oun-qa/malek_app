@@ -6,11 +6,12 @@ from frappe.model.document import Document
 from library_managment.library_managment.doctype.member_registration.scripts.check_member_existence import check_member_existence
 
 class MemberRegistration(Document):
+    
+    def after_save(self):
+        frappe.msgprint("Your registration request sent successfully.")
 	
     def before_save(self):
         if check_member_existence(self.first_name, self.last_name, self.email_address):
             frappe.throw("This person is already a member in the library")
 
-    def after_save(self):
-        frappe.msgprint("Your registration request sent successfully.")
 
