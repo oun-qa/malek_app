@@ -8,20 +8,24 @@ frappe.ui.form.on('Member Registration', {
 
 		if (isLibrarian) {
 			frm.add_custom_button('Approve Request', () => {
-				frm.set_value('status', 'Approved');
-				frm.save().then(() => {
-                    frappe.call({
-                        method: 'library_managment.library_managment.doctype.member_registration.scripts.create_library_member_record.create_library_member',
-                        args: {
-                            member_registration: frm.doc.name
-                        },
-                        callback: function(response) {
-                            if (!response.exc) {
-                                frappe.msgprint('Library Member added successfully.');
+                if (frm.doc.status === 'Rejected'){
+                    frappe.msgprint("You cannot approve a request that has already been rejected.")
+                } else {
+                    frm.set_value('status', 'Approved');
+                    frm.save().then(() => {
+                        frappe.call({
+                            method: 'library_managment.library_managment.doctype.member_registration.scripts.create_library_member_record.create_library_member',
+                            args: {
+                                member_registration: frm.doc.name
+                            },
+                            callback: function(response) {
+                                if (!response.exc) {
+                                    frappe.msgprint('Library Member added successfully.');
+                                }
                             }
-                        }
+                        });
                     });
-                });
+                }
             });
 			
 			frm.add_custom_button('Reject Request', () => {
