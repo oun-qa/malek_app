@@ -4,11 +4,17 @@
 import frappe
 from frappe.model.document import Document
 from library_managment.library_managment.doctype.member_registration.scripts.check_member_existence import check_member_existence
+from library_managment.library_managment.doctype.member_registration.scripts.create_library_member_record import create_library_member
+
 
 class MemberRegistration(Document):
 
-    def before_save(self):
+    def before_insert(self):
         if check_member_existence(self.first_name, self.last_name, self.email_address):
             frappe.throw("This person is already a member in the library")
+
+    def on_submit(self):
+        create_library_member(self.name)
+
 
 
