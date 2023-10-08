@@ -6,7 +6,7 @@ frappe.ui.form.on('Member Registration', {
 	refresh: function(frm) {
 		const isLibrarian = frappe.user.has_role('Librarian');
 
-		if (isLibrarian && frm.doc.status === 'Approved by Library members leader') {
+		if (isLibrarian && frm.doc.docstatus == 1) {
 			frm.add_custom_button('Approve Request', () => {
                 if (frm.doc.status === 'Rejected'){
                     frappe.msgprint("You cannot approve a request that has already been rejected.")
