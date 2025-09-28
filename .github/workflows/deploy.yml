@@ -16,10 +16,15 @@ jobs:
 
       - name: Download StrongDM CLI (Linux amd64)
         run: |
-          curl -J -O -L https://app.strongdm.com/releases/cli/linux -o sdm.zip
+          curl -L https://app.strongdm.com/releases/cli/strongdm-cli_latest_linux_amd64.zip -o sdm.zip
           unzip sdm.zip
+          chmod +x sdm
+          sudo mv sdm /usr/local/bin/sdm
+
+      - name: Test StrongDM CLI
+        run: |
           export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
-          ./sdm audit users
+          sdm audit users
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
