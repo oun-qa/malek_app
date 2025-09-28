@@ -30,7 +30,7 @@ jobs:
       - name: Test StrongDM CLI
         run: |
           export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
-          sdm audit users
+          sdm status
 
 
       - name: Deploy to customer1
