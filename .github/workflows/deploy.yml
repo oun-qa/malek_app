@@ -31,15 +31,32 @@ jobs:
 
       - name: Start StrongDM Daemon and Login
         run: |
-          echo "Starting StrongDM daemon in background and logging in..."
+          echo "Starting StrongDM daemon in background..."
           # Start the sdm daemon in the background. The `sdm` command itself acts as the daemon.
           # We use `nohup` to detach it from the terminal and `&` to run it in the background.
           # Redirect output to a log file to prevent it from blocking the workflow.
           # The `sdm login` command will then authenticate this running daemon.
           nohup sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }} > sdm_daemon.log 2>&1 &
-          # Give the daemon a moment to initialize and connect
-          sleep 10
-          echo "StrongDM daemon started and login attempted."
+          # Store the PID for later cleanup
+          echo $! > sdm_daemon.pid
+          echo "StrongDM daemon started with PID $(cat sdm_daemon.pid)."
+          # Give the daemon a moment to initialize
+          sleep 5
+
+      - name: Wait for StrongDM Daemon Readiness
+        run: |
+          echo "Waiting for StrongDM daemon to be ready..."
+          # Use sdm ready in a loop to ensure the daemon is fully operational
+          for i in $(seq 1 10); do
+            if sdm ready; then
+              echo "StrongDM daemon is ready."
+              exit 0
+            fi
+            echo "Daemon not ready yet, waiting... ($i/10)"
+            sleep 5
+          done
+          echo "StrongDM daemon did not become ready in time."
+          exit 1
 
       - name: Test StrongDM CLI Status (Daemon should be running and connected)
         run: |
@@ -51,18 +68,22 @@ jobs:
         if: contains(github.event.head_commit.message, '[customer1]')
         run: |
           echo "Attempting SSH deployment to customer1..."
-          # Now sdm ssh should work as the daemon is running and authenticated
           sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
           echo "SSH deployment command executed."
 
-      - name: Stop StrongDM Daemon (Optional Cleanup)
+      - name: Stop StrongDM Daemon (Cleanup)
         if: always()
         run: |
           echo "Attempting to stop StrongDM daemon..."
-          # Find the PID of the sdm daemon and kill it
-          # This step is important for cleanup in ephemeral environments
-          pkill sdm || true
-          echo "StrongDM daemon stopped."
+          # Kill the daemon using its PID
+          if [ -f sdm_daemon.pid ]; then
+            kill $(cat sdm_daemon.pid) || true
+            echo "StrongDM daemon stopped."
+          else
+            echo "sdm_daemon.pid not found, attempting pkill..."
+            pkill sdm || true
+            echo "StrongDM daemon stopped (via pkill)."
+          fi
