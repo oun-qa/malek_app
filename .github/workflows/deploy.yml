@@ -14,34 +14,56 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download and Install StrongDM CLI
+      - name: Download and Full Install StrongDM CLI
         run: |
-          # Download the CLI (keeps the original filename from the server)
+          echo "Downloading StrongDM CLI..."
           curl -J -O -L https://app.strongdm.com/releases/cli/linux
       
-          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
           SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
-      
-          # Unzip and make executable
+          echo "Found StrongDM CLI zip: $SDM_ZIP"
           unzip $SDM_ZIP
-          chmod +x sdm
-          sudo mv sdm /usr/local/bin/sdm
+          echo "Unzipped StrongDM CLI."
 
-      - name: Login to StrongDM
-        run: |
-          echo "Logging into StrongDM..."
-          sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }}
-          echo "StrongDM login complete."
+          echo "Performing full StrongDM CLI installation..."
+          # Run the full installation, which sets up the daemon and moves sdm to /usr/local/bin
+          # The --app-domain is important for proper configuration.
+          sudo ./sdm install --app-domain app.strongdm.com
+          echo "StrongDM CLI full installation complete."
 
-      - name: Test StrongDM CLI Status
+      - name: Start StrongDM Daemon and Login
         run: |
+          echo "Starting StrongDM daemon in background and logging in..."
+          # Start the sdm daemon in the background. The `sdm` command itself acts as the daemon.
+          # We use `nohup` to detach it from the terminal and `&` to run it in the background.
+          # Redirect output to a log file to prevent it from blocking the workflow.
+          # The `sdm login` command will then authenticate this running daemon.
+          nohup sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }} > sdm_daemon.log 2>&1 &
+          # Give the daemon a moment to initialize and connect
+          sleep 10
+          echo "StrongDM daemon started and login attempted."
+
+      - name: Test StrongDM CLI Status (Daemon should be running and connected)
+        run: |
+          echo "Checking StrongDM status..."
           sdm status
-          # Expected output: servers should now show as 'connected' or 'ready'
+          # Expected output: servers should now show as \'connected\' or \'ready\'
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
         run: |
+          echo "Attempting SSH deployment to customer1..."
+          # Now sdm ssh should work as the daemon is running and authenticated
           sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
+          echo "SSH deployment command executed."
+
+      - name: Stop StrongDM Daemon (Optional Cleanup)
+        if: always()
+        run: |
+          echo "Attempting to stop StrongDM daemon..."
+          # Find the PID of the sdm daemon and kill it
+          # This step is important for cleanup in ephemeral environments
+          pkill sdm || true
+          echo "StrongDM daemon stopped."
