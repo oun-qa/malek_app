@@ -17,7 +17,7 @@ jobs:
       - name: Setup StrongDM Access
         uses: strongdm/sdm-access-gh-action@v1
         with:
-          admin-token: ${{ secretfs.SDM_ADMIN_TOKEN }}
+          admin-token: ${{ secrets.SDM_ADMIN_TOKEN }}
 
       - name: Test StrongDM CLI Connection
         run: |
