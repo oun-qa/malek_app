@@ -14,6 +14,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # Or your preferred AWS region
+
+      - name: Login to Amazon ECR Public
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: public
+
       - name: Run StrongDM Client in Docker Container
         run: |
           echo "Starting StrongDM Docker Service Client Container..."
@@ -21,7 +33,7 @@ jobs:
           docker pull public.ecr.aws/strongdm/client:latest
 
           # Run the container in detached mode, passing the service token as an environment variable.
-          # The entire docker run command is now on a single logical line to avoid syntax errors.
+          # The entire docker run command is on a single logical line to avoid syntax errors.
           docker run -d --name strongdm-client --rm -p 50000:50000 -e SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} public.ecr.aws/strongdm/client:latest
           echo "StrongDM Docker container started."
 
