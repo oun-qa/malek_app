@@ -43,6 +43,21 @@ jobs:
           # Give the daemon a moment to initialize
           sleep 5
 
+      - name: Wait for StrongDM Daemon Readiness
+        run: |
+          echo "Waiting for StrongDM daemon to be ready..."
+          # Use sdm ready in a loop to ensure the daemon is fully operational
+          for i in $(seq 1 10); do
+            if sdm ready; then
+              echo "StrongDM daemon is ready."
+              exit 0
+            fi
+            echo "Daemon not ready yet, waiting... ($i/10)"
+            sleep 5
+          done
+          echo "StrongDM daemon did not become ready in time."
+          exit 1
+
       - name: Test StrongDM CLI Status (Daemon should be running and connected)
         run: |
           echo "Checking StrongDM status..."
