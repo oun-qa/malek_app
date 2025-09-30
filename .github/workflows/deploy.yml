@@ -14,29 +14,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download StrongDM CLI
-        run: |
-          # Download the CLI (keeps the original filename from the server)
-          curl -J -O -L https://app.strongdm.com/releases/cli/linux
-      
-          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
-          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
-      
-          # Unzip and make executable
-          unzip $SDM_ZIP
-          chmod +x sdm
-          sudo mv sdm /usr/local/bin/sdm
-      
-      - name: Test StrongDM CLI
-        run: |
-          export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
-          sdm status
+      - name: Setup StrongDM Access
+        uses: strongdm/sdm-access-gh-action@v1
+        with:
+          admin-token: ${{ secretfs.SDM_ADMIN_TOKEN }}
 
+      - name: Test StrongDM CLI Connection
+        run: |
+          sdm status
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
         run: |
-          SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm ssh erp_demo "
+          sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
