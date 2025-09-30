@@ -14,14 +14,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup StrongDM Access
-        uses: strongdm/sdm-access-gh-action@v1.0.2
-        with:
-          admin-token: ${{ secrets.SDM_ADMIN_TOKEN }}
+      - name: Download and Install StrongDM CLI
+        run: |
+          # Download the CLI (keeps the original filename from the server)
+          curl -J -O -L https://app.strongdm.com/releases/cli/linux
+      
+          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
+          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
+      
+          # Unzip and make executable
+          unzip $SDM_ZIP
+          chmod +x sdm
+          sudo mv sdm /usr/local/bin/sdm
 
-      - name: Test StrongDM CLI Connection
+      - name: Login to StrongDM
+        run: |
+          echo "Logging into StrongDM..."
+          sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }}
+          echo "StrongDM login complete."
+
+      - name: Test StrongDM CLI Status
         run: |
           sdm status
+          # Expected output: servers should now show as 'connected' or 'ready'
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
