@@ -31,15 +31,14 @@ jobs:
 
       - name: Start StrongDM Daemon and Login
         run: |
-          echo "Starting StrongDM daemon in background..."
-          # Start the sdm daemon in the background. The `sdm` command itself acts as the daemon.
+          echo "Starting StrongDM daemon in background and logging in..."
+          # The `sdm login` command is expected to start the daemon and authenticate it.
           # We use `nohup` to detach it from the terminal and `&` to run it in the background.
           # Redirect output to a log file to prevent it from blocking the workflow.
-          # The `sdm login` command will then authenticate this running daemon.
           nohup sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }} > sdm_daemon.log 2>&1 &
           # Store the PID for later cleanup
           echo $! > sdm_daemon.pid
-          echo "StrongDM daemon started with PID $(cat sdm_daemon.pid)."
+          echo "StrongDM daemon started with PID $(cat sdm_daemon.pid) and login attempted."
           # Give the daemon a moment to initialize
           sleep 5
 
@@ -47,12 +46,12 @@ jobs:
         run: |
           echo "Waiting for StrongDM daemon to be ready..."
           # Use sdm ready in a loop to ensure the daemon is fully operational
-          for i in $(seq 1 10); do
+          for i in $(seq 1 12); do # Increased attempts to 12 (60 seconds total)
             if sdm ready; then
               echo "StrongDM daemon is ready."
               exit 0
             fi
-            echo "Daemon not ready yet, waiting... ($i/10)"
+            echo "Daemon not ready yet, waiting... ($i/12)"
             sleep 5
           done
           echo "StrongDM daemon did not become ready in time."
