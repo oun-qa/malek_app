@@ -14,75 +14,63 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download and Setup StrongDM CLI (Non-Interactive)
+      - name: Run StrongDM Client in Docker Container
         run: |
-          echo "Downloading StrongDM CLI..."
-          curl -J -O -L https://app.strongdm.com/releases/cli/linux
-      
-          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
-          echo "Found StrongDM CLI zip: $SDM_ZIP"
-          unzip $SDM_ZIP
-          echo "Unzipped StrongDM CLI."
+          echo "Starting StrongDM Docker Service Client Container..."
+          # Pull the official StrongDM client Docker image
+          docker pull public.ecr.aws/strongdm/client:latest
 
-          # Move the sdm binary to a location in PATH
-          chmod +x sdm
-          sudo mv sdm /usr/local/bin/sdm
-          echo "StrongDM CLI moved to /usr/local/bin."
+          # Run the container in detached mode, passing the service token as an environment variable.
+          # We map a local port (e.g., 50000) to the container's internal port for SSH connections.
+          # The actual port used for SSH will be dynamically assigned by StrongDM and can be found via `sdm status`.
+          # It's crucial to expose ports that StrongDM might use for its proxy connections.
+          # For simplicity, we'll map a generic port, but for specific resources, you might need to map more.
+          docker run -d \
+            --name strongdm-client \
+            --rm \
+            -p 50000:50000 \
+            -e SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} \
+            public.ecr.aws/strongdm/client:latest
+          echo "StrongDM Docker container started."
 
-      - name: Start StrongDM Daemon and Login
+      - name: Wait for StrongDM Client Readiness in Docker
         run: |
-          echo "Starting StrongDM daemon in background and logging in..."
-          # The `sdm login` command is expected to start the daemon and authenticate it.
-          # We use `nohup` to detach it from the terminal and `&` to run it in the background.
-          # Redirect output to a log file to prevent it from blocking the workflow.
-          nohup sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }} > sdm_daemon.log 2>&1 &
-          # Store the PID for later cleanup
-          echo $! > sdm_daemon.pid
-          echo "StrongDM daemon started with PID $(cat sdm_daemon.pid) and login attempted."
-          # Give the daemon a moment to initialize
-          sleep 5
-
-      - name: Wait for StrongDM Daemon Readiness
-        run: |
-          echo "Waiting for StrongDM daemon to be ready..."
-          # Use sdm ready in a loop to ensure the daemon is fully operational
-          for i in $(seq 1 12); do # Increased attempts to 12 (60 seconds total)
-            if sdm ready; then
-              echo "StrongDM daemon is ready."
+          echo "Waiting for StrongDM client in Docker to be ready..."
+          # Use a loop to check the status of the StrongDM client inside the container
+          # The `sdm status` command inside the container will indicate readiness.
+          for i in $(seq 1 20); do # Increased attempts to 20 (100 seconds total)
+            if docker exec strongdm-client sdm status > /dev/null 2>&1; then
+              echo "StrongDM client in Docker is ready."
               exit 0
             fi
-            echo "Daemon not ready yet, waiting... ($i/12)"
+            echo "StrongDM client not ready yet, waiting... ($i/20)"
             sleep 5
           done
-          echo "StrongDM daemon did not become ready in time."
+          echo "StrongDM client in Docker did not become ready in time."
           exit 1
 
-      - name: Test StrongDM CLI Status (Daemon should be running and connected)
+      - name: Get StrongDM Resource Status and Ports
         run: |
-          echo "Checking StrongDM status..."
-          sdm status
-          # Expected output: servers should now show as \'connected\' or \'ready\'
+          echo "Checking StrongDM resource status from within the container..."
+          # Execute sdm status inside the container to get the current status and assigned ports
+          docker exec strongdm-client sdm status
+          # This output will show the dynamically assigned local proxy ports for your resources.
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
         run: |
           echo "Attempting SSH deployment to customer1..."
-          sdm ssh erp_demo "
+          # The most reliable way to use sdm ssh with the client in a Docker container
+          # is to execute the `sdm ssh` command directly inside the container.
+          docker exec strongdm-client sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
           echo "SSH deployment command executed."
 
-      - name: Stop StrongDM Daemon (Cleanup)
+      - name: Stop StrongDM Docker Container (Cleanup)
         if: always()
         run: |
-          echo "Attempting to stop StrongDM daemon..."
-          # Kill the daemon using its PID
-          if [ -f sdm_daemon.pid ]; then
-            kill $(cat sdm_daemon.pid) || true
-            echo "StrongDM daemon stopped."
-          else
-            echo "sdm_daemon.pid not found, attempting pkill..."
-            pkill sdm || true
-            echo "StrongDM daemon stopped (via pkill)."
-          fi
+          echo "Stopping StrongDM Docker container..."
+          docker stop strongdm-client || true
+          echo "StrongDM Docker container stopped."
