@@ -21,16 +21,8 @@ jobs:
           docker pull public.ecr.aws/strongdm/client:latest
 
           # Run the container in detached mode, passing the service token as an environment variable.
-          # We map a local port (e.g., 50000) to the container's internal port for SSH connections.
-          # The actual port used for SSH will be dynamically assigned by StrongDM and can be found via `sdm status`.
-          # It's crucial to expose ports that StrongDM might use for its proxy connections.
-          # For simplicity, we'll map a generic port, but for specific resources, you might need to map more.
-          docker run -d \
-            --name strongdm-client \
-            --rm \
-            -p 50000:50000 \
-            -e SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} \
-            public.ecr.aws/strongdm/client:latest
+          # The entire docker run command is now on a single logical line to avoid syntax errors.
+          docker run -d --name strongdm-client --rm -p 50000:50000 -e SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} public.ecr.aws/strongdm/client:latest
           echo "StrongDM Docker container started."
 
       - name: Wait for StrongDM Client Readiness in Docker
@@ -54,7 +46,6 @@ jobs:
           echo "Checking StrongDM resource status from within the container..."
           # Execute sdm status inside the container to get the current status and assigned ports
           docker exec strongdm-client sdm status
-          # This output will show the dynamically assigned local proxy ports for your resources.
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
