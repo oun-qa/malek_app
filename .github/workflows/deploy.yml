@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download and Full Install StrongDM CLI
+      - name: Download and Setup StrongDM CLI (Non-Interactive)
         run: |
           echo "Downloading StrongDM CLI..."
           curl -J -O -L https://app.strongdm.com/releases/cli/linux
@@ -24,11 +24,10 @@ jobs:
           unzip $SDM_ZIP
           echo "Unzipped StrongDM CLI."
 
-          echo "Performing full StrongDM CLI installation..."
-          # Run the full installation, which sets up the daemon and moves sdm to /usr/local/bin
-          # The --app-domain is important for proper configuration.
-          sudo ./sdm install --app-domain app.strongdm.com
-          echo "StrongDM CLI full installation complete."
+          # Move the sdm binary to a location in PATH
+          chmod +x sdm
+          sudo mv sdm /usr/local/bin/sdm
+          echo "StrongDM CLI moved to /usr/local/bin."
 
       - name: Start StrongDM Daemon and Login
         run: |
