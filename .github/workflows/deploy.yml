@@ -14,66 +14,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Or your preferred AWS region
-
-      - name: Login to Amazon ECR Public
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          registry-type: public
-
-      - name: Run StrongDM Client in Docker Container
+      - name: Download StrongDM CLI
         run: |
-          echo "Starting StrongDM Docker Service Client Container..."
-          # Pull the official StrongDM client Docker image
-          docker pull public.ecr.aws/strongdm/client:latest
-
-          # Run the container in detached mode, passing the service token as an environment variable.
-          # The entire docker run command is on a single logical line to avoid syntax errors.
-          docker run -d --name strongdm-client --rm -p 50000:50000 -e SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} public.ecr.aws/strongdm/client:latest
-          echo "StrongDM Docker container started."
-
-      - name: Wait for StrongDM Client Readiness in Docker
+          # Download the CLI (keeps the original filename from the server)
+          curl -J -O -L https://app.strongdm.com/releases/cli/linux
+      
+          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
+          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
+      
+          # Unzip and make executable
+          unzip $SDM_ZIP
+          chmod +x sdm
+          sudo mv sdm /usr/local/bin/sdm
+      
+      - name: Test StrongDM CLI
         run: |
-          echo "Waiting for StrongDM client in Docker to be ready..."
-          # Use a loop to check the status of the StrongDM client inside the container
-          # The `sdm status` command inside the container will indicate readiness.
-          for i in $(seq 1 20); do # Increased attempts to 20 (100 seconds total)
-            if docker exec strongdm-client sdm status > /dev/null 2>&1; then
-              echo "StrongDM client in Docker is ready."
-              exit 0
-            fi
-            echo "StrongDM client not ready yet, waiting... ($i/20)"
-            sleep 5
-          done
-          echo "StrongDM client in Docker did not become ready in time."
-          exit 1
+          export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
+          sdm status
 
-      - name: Get StrongDM Resource Status and Ports
-        run: |
-          echo "Checking StrongDM resource status from within the container..."
-          # Execute sdm status inside the container to get the current status and assigned ports
-          docker exec strongdm-client sdm status
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
         run: |
-          echo "Attempting SSH deployment to customer1..."
-          # The most reliable way to use sdm ssh with the client in a Docker container
-          # is to execute the `sdm ssh` command directly inside the container.
-          docker exec strongdm-client sdm ssh erp_demo "
+          SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
-          echo "SSH deployment command executed."
-
-      - name: Stop StrongDM Docker Container (Cleanup)
-        if: always()
-        run: |
-          echo "Stopping StrongDM Docker container..."
-          docker stop strongdm-client || true
-          echo "StrongDM Docker container stopped."
