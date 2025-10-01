@@ -29,10 +29,10 @@ jobs:
       
       - name: Start StrongDM Daemon
         run: |
-          export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
-          nohup sdm daemon > /tmp/sdm.log 2>&1 &
+          nohup env SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm daemon > /tmp/sdm.log 2>&1 &
           sleep 5
           sdm status
+
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
