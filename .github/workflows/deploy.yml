@@ -29,9 +29,10 @@ jobs:
       
       - name: Start StrongDM Daemon
         run: |
-          nohup env SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm daemon > /tmp/sdm.log 2>&1 &
+          nohup bash -c "SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm daemon" > /tmp/sdm.log 2>&1 &
           sleep 5
           sdm status
+
 
 
       - name: Deploy to customer1
