@@ -27,13 +27,10 @@ jobs:
           chmod +x sdm
           sudo mv sdm /usr/local/bin/sdm
       
-      - name: Start StrongDM Daemon
+      - name: Test StrongDM CLI
         run: |
-          nohup bash -c "SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm daemon" > /tmp/sdm.log 2>&1 &
-          sleep 5
-          sdm status
-
-
+            export SDM_SERVICE_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
+            sdm status
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
