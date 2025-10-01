@@ -27,25 +27,17 @@ jobs:
           chmod +x sdm
           sudo mv sdm /usr/local/bin/sdm
       
-      - name: Start StrongDM Daemon
-        env:
-          SDM_ADMIN_TOKEN: ${{ secrets.SDM_ADMIN_TOKEN }}
+      - name: Test StrongDM CLI
         run: |
-          mkdir -p ~/.sdm
-          nohup sdm daemon > /tmp/sdm.log 2>&1 &
-          sleep 5
-          sdm status
-
+            export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
+            sdm status
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
-        env:
-          SDM_ADMIN_TOKEN: ${{ secrets.SDM_ADMIN_TOKEN }}
         run: |
-          sdm connect erp_demo
+          SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm connect erp_demo
           sdm status
-          sdm ssh erp_demo "
+          SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }} sdm ssh erp_demo "
             cd /opt/bench/frappe-bench/ &&
             bench get-app git@github.com:oun-qa/malek_app.git
           "
-
