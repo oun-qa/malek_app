@@ -28,11 +28,16 @@ jobs:
     steps:
       - name: 'Install strongDM (sdm) CLI'
         run: |
-          echo "Fetching and installing the latest sdm CLI..."
+          # Download the CLI (keeps the original filename from the server)
           curl -J -O -L https://app.strongdm.com/releases/cli/linux
-          unzip sdm_*.zip
-          echo "$(pwd )" >> $GITHUB_PATH
-          echo "sdm CLI installed and available in PATH."
+      
+          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
+          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
+      
+          # Unzip and make executable
+          unzip $SDM_ZIP
+          chmod +x sdm
+          sudo mv sdm /usr/local/bin/sdm
 
       - name: 'Authenticate to strongDM'
         uses: strongdm/sdm-access-gh-action@v1.0.2
