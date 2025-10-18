@@ -1,0 +1,66 @@
+# -----------------------------------------------------------------------------
+#          Full Workflow for SSH to a Server via strongDM
+# -----------------------------------------------------------------------------
+#
+# How this works:
+# 1. Manual Trigger: You can run this workflow manually from the GitHub UI.
+# 2. Install sdm CLI: The GitHub runner needs the 'sdm' command-line tool.
+#    This step downloads, unzips, and adds it to the system's PATH.
+# 3. Authenticate to strongDM: This is where the sdm-access-gh-action is used.
+#    It takes your API keys from GitHub Secrets and runs 'sdm login' and
+#    'sdm connect' in the background, preparing the runner for connections.
+# 4. Execute Remote Commands: With the connection active, this step uses
+#    'sdm ssh' to run commands on your target server. The sdm CLI handles
+#    all the connection details (ports, keys, etc.) transparently.
+#
+# -----------------------------------------------------------------------------
+
+name: 'Execute Remote Commands via strongDM SSH'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  execute-remote-commands:
+    name: 'Connect to Server and Run Script'
+    runs-on: ubuntu-latest 
+
+    steps:
+      - name: 'Install strongDM (sdm) CLI'
+        run: |
+          echo "Fetching and installing the latest sdm CLI..."
+          curl -J -O -L https://app.strongdm.com/releases/cli/linux
+          unzip sdm_*.zip
+          echo "$(pwd )" >> $GITHUB_PATH
+          echo "sdm CLI installed and available in PATH."
+
+      - name: 'Authenticate to strongDM'
+        uses: strongdm/sdm-access-gh-action@v2
+        with:
+          sdm-api-access-key: ${{ secrets.SDM_API_ACCESS_KEY }}
+          sdm-api-secret-key: ${{ secrets.SDM_API_SECRET_KEY }}
+
+      - name: 'Run commands on remote GCP server'
+        run: |
+          echo "Connecting to 'malek-vm' via sdm ssh..."
+          
+          sdm ssh "malek-vm" << 'EOF'
+          # ------------------- REMOTE SCRIPT STARTS HERE --------------------
+          # All commands inside this block will be executed on your GCP server.
+          
+          echo "--- System Information ---"
+          uname -a
+          
+          echo "\n--- Current User ---"
+          whoami
+          
+          echo "\n--- Top-level directory listing ---"
+          ls -la /
+          
+          echo "\n--- Script execution finished successfully! ---"
+          
+          # -------------------- REMOTE SCRIPT ENDS HERE ---------------------
+          EOF
+          
+          echo "Finished executing remote commands."
+
