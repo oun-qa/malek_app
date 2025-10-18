@@ -39,25 +39,23 @@ jobs:
           chmod +x sdm
           sudo mv sdm /usr/local/bin/sdm
 
-      # Step 2: Authenticate and Connect Manually.
-      # This replaces the 'uses: strongdm/sdm-access-gh-action' step.
+      # Step 2: Authenticate and Connect Manually (with the fix)
       - name: 'Authenticate to strongDM and Start Listener'
         run: |
           echo "Logging into strongDM..."
-          # Use the API keys from secrets to log in.
-          sdm login --admin-token "${{ secrets.SDM_API_ACCESS_KEY }},${{ secrets.SDM_API_SECRET_KEY }}"
+          # CORRECTED LINE: Removed the double quotes around the token string.
+          sdm login --admin-token ${{ secrets.SDM_API_ACCESS_KEY }},${{ secrets.SDM_API_SECRET_KEY }}
           
           echo "Starting sdm listener in the background..."
-          # Run 'sdm connect' as a background process. The '&' is crucial.
           sdm connect &
           
-          # Give the listener a moment to initialize.
+          echo "Waiting for listener to initialize..."
           sleep 5
           
-          echo "Checking listener status..."
+          echo "Verifying listener status..."
           sdm status
 
-      # Step 3: Run commands on the remote server. This remains the same.
+      # Step 3: Run commands on the remote server (No changes needed)
       - name: 'Run commands on remote GCP server'
         run: |
           echo "Connecting to 'malek-vm' via sdm ssh..."
