@@ -39,19 +39,31 @@ jobs:
           chmod +x sdm
           sudo mv sdm /usr/local/bin/sdm
 
-      - name: 'Authenticate to strongDM'
-        uses: strongdm/sdm-access-gh-action@v1.0.2
-        with:
-          sdm-api-access-key: ${{ secrets.SDM_API_ACCESS_KEY }}
-          sdm-api-secret-key: ${{ secrets.SDM_API_SECRET_KEY }}
+      # Step 2: Authenticate and Connect Manually.
+      # This replaces the 'uses: strongdm/sdm-access-gh-action' step.
+      - name: 'Authenticate to strongDM and Start Listener'
+        run: |
+          echo "Logging into strongDM..."
+          # Use the API keys from secrets to log in.
+          sdm login --admin-token "${{ secrets.SDM_API_ACCESS_KEY }},${{ secrets.SDM_API_SECRET_KEY }}"
+          
+          echo "Starting sdm listener in the background..."
+          # Run 'sdm connect' as a background process. The '&' is crucial.
+          sdm connect &
+          
+          # Give the listener a moment to initialize.
+          sleep 5
+          
+          echo "Checking listener status..."
+          sdm status
 
+      # Step 3: Run commands on the remote server. This remains the same.
       - name: 'Run commands on remote GCP server'
         run: |
           echo "Connecting to 'malek-vm' via sdm ssh..."
           
           sdm ssh "malek-vm" << 'EOF'
           # ------------------- REMOTE SCRIPT STARTS HERE --------------------
-          # All commands inside this block will be executed on your GCP server.
           
           echo "--- System Information ---"
           uname -a
@@ -66,6 +78,8 @@ jobs:
           
           # -------------------- REMOTE SCRIPT ENDS HERE ---------------------
           EOF
+          
+          echo "Finished executing remote commands."
           
           echo "Finished executing remote commands."
 
