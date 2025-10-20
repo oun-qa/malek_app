@@ -1,0 +1,44 @@
+name: StrongDM Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup-strongdm:
+    runs-on: ubuntu-latest
+
+    env:
+      SDM_DOCKERIZED: true
+      SDM_VERBOSE: true
+      SDM_DISABLE_UPDATE: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download StrongDM CLI
+        run: | 
+          curl -Lso sdm.zip "https://app.strongdm.com/releases/cli/linux/oun-for-consultation-and-support"
+          unzip sdm.zip
+          rm sdm.zip
+          chmod +x sdm
+
+      - name: StrongDM install
+        run: |
+          sudo ./sdm install --nologin
+
+      - name: Test StrongDM CLI 
+        run: |
+          sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }}
+          sdm status
+          cat /var/tmp/sdm.log
+
+      - name: Connect and deploy (Customer 1)
+        if: contains(github.event.head_commit.message, '[customer1]')
+        run: |
+          sdm connect erp_demo
+          until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
+          sdm status
+          sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app git@github.com:oun-qa/malek_app.git"
