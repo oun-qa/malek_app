@@ -43,4 +43,4 @@ jobs:
           sdm status
           # Disable host key checking
           export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
-          sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app git@github.com:oun-qa/malek_app.git"
+          sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app https://github.com/oun-qa/malek_app.git"
