@@ -1,83 +1,83 @@
-# -----------------------------------------------------------------------------
-#          Full Workflow for SSH to a Server via strongDM
-# -----------------------------------------------------------------------------
-#
-# How this works:
-# 1. Manual Trigger: You can run this workflow manually from the GitHub UI.
-# 2. Install sdm CLI: The GitHub runner needs the 'sdm' command-line tool.
-#    This step downloads, unzips, and adds it to the system's PATH.
-# 3. Authenticate to strongDM: This is where the sdm-access-gh-action is used.
-#    It takes your API keys from GitHub Secrets and runs 'sdm login' and
-#    'sdm connect' in the background, preparing the runner for connections.
-# 4. Execute Remote Commands: With the connection active, this step uses
-#    'sdm ssh' to run commands on your target server. The sdm CLI handles
-#    all the connection details (ports, keys, etc.) transparently.
-#
-# -----------------------------------------------------------------------------
+# # -----------------------------------------------------------------------------
+# #          Full Workflow for SSH to a Server via strongDM
+# # -----------------------------------------------------------------------------
+# #
+# # How this works:
+# # 1. Manual Trigger: You can run this workflow manually from the GitHub UI.
+# # 2. Install sdm CLI: The GitHub runner needs the 'sdm' command-line tool.
+# #    This step downloads, unzips, and adds it to the system's PATH.
+# # 3. Authenticate to strongDM: This is where the sdm-access-gh-action is used.
+# #    It takes your API keys from GitHub Secrets and runs 'sdm login' and
+# #    'sdm connect' in the background, preparing the runner for connections.
+# # 4. Execute Remote Commands: With the connection active, this step uses
+# #    'sdm ssh' to run commands on your target server. The sdm CLI handles
+# #    all the connection details (ports, keys, etc.) transparently.
+# #
+# # -----------------------------------------------------------------------------
 
-name: 'Execute Remote Commands via strongDM SSH'
+# name: 'Execute Remote Commands via strongDM SSH'
 
-on:
-  workflow_dispatch:
+# on:
+#   workflow_dispatch:
 
-jobs:
-  execute-remote-commands:
-    name: 'Connect to Server and Run Script'
-    runs-on: ubuntu-latest 
+# jobs:
+#   execute-remote-commands:
+#     name: 'Connect to Server and Run Script'
+#     runs-on: ubuntu-latest 
 
-    steps:
-      - name: 'Install strongDM (sdm) CLI'
-        run: |
-          # Download the CLI (keeps the original filename from the server)
-          curl -J -O -L https://app.strongdm.com/releases/cli/linux
+#     steps:
+#       - name: 'Install strongDM (sdm) CLI'
+#         run: |
+#           # Download the CLI (keeps the original filename from the server)
+#           curl -J -O -L https://app.strongdm.com/releases/cli/linux
       
-          # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
-          SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
+#           # Find the downloaded zip file (the server gives a name like sdmcli_40.87.0_linux_amd64.zip)
+#           SDM_ZIP=$(ls sdmcli_*_linux_amd64.zip)
       
-          # Unzip and make executable
-          unzip $SDM_ZIP
-          chmod +x sdm
-          sudo mv sdm /usr/local/bin/sdm
+#           # Unzip and make executable
+#           unzip $SDM_ZIP
+#           chmod +x sdm
+#           sudo mv sdm /usr/local/bin/sdm
 
-      # Step 2: Authenticate and Connect Manually (with the fix)
-      - name: 'Authenticate to strongDM and Start Listener'
-        run: |
-          echo "Logging into strongDM..."
-          # CORRECTED LINE: Removed the double quotes around the token string.
-          sdm login --admin-token ${{ secrets.SDM_API_ACCESS_KEY }},${{ secrets.SDM_API_SECRET_KEY }}
+#       # Step 2: Authenticate and Connect Manually (with the fix)
+#       - name: 'Authenticate to strongDM and Start Listener'
+#         run: |
+#           echo "Logging into strongDM..."
+#           # CORRECTED LINE: Removed the double quotes around the token string.
+#           sdm login --admin-token ${{ secrets.SDM_API_ACCESS_KEY }},${{ secrets.SDM_API_SECRET_KEY }}
           
-          echo "Starting sdm listener in the background..."
-          sdm connect &
+#           echo "Starting sdm listener in the background..."
+#           sdm connect &
           
-          echo "Waiting for listener to initialize..."
-          sleep 5
+#           echo "Waiting for listener to initialize..."
+#           sleep 5
           
-          echo "Verifying listener status..."
-          sdm status
+#           echo "Verifying listener status..."
+#           sdm status
 
-      # Step 3: Run commands on the remote server (No changes needed)
-      - name: 'Run commands on remote GCP server'
-        run: |
-          echo "Connecting to 'malek-vm' via sdm ssh..."
+#       # Step 3: Run commands on the remote server (No changes needed)
+#       - name: 'Run commands on remote GCP server'
+#         run: |
+#           echo "Connecting to 'malek-vm' via sdm ssh..."
           
-          sdm ssh "malek-vm" << 'EOF'
-          # ------------------- REMOTE SCRIPT STARTS HERE --------------------
+#           sdm ssh "malek-vm" << 'EOF'
+#           # ------------------- REMOTE SCRIPT STARTS HERE --------------------
           
-          echo "--- System Information ---"
-          uname -a
+#           echo "--- System Information ---"
+#           uname -a
           
-          echo "\n--- Current User ---"
-          whoami
+#           echo "\n--- Current User ---"
+#           whoami
           
-          echo "\n--- Top-level directory listing ---"
-          ls -la /
+#           echo "\n--- Top-level directory listing ---"
+#           ls -la /
           
-          echo "\n--- Script execution finished successfully! ---"
+#           echo "\n--- Script execution finished successfully! ---"
           
-          # -------------------- REMOTE SCRIPT ENDS HERE ---------------------
-          EOF
+#           # -------------------- REMOTE SCRIPT ENDS HERE ---------------------
+#           EOF
           
-          echo "Finished executing remote commands."
+#           echo "Finished executing remote commands."
           
-          echo "Finished executing remote commands."
+#           echo "Finished executing remote commands."
 
