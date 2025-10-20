@@ -41,6 +41,12 @@ jobs:
           sdm connect erp_demo
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
-          # Disable host key checking
-          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
-          sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app https://github.com/oun-qa/malek_app.git"
+          
+          sdm ssh erp_demo "
+            set -e
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            cd /opt/bench/frappe-bench/
+            git config --global url.\"https://github.com/\".insteadOf git@github.com:
+            bench get-app https://github.com/oun-qa/malek_app.git
+          "
