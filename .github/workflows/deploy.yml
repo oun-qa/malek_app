@@ -31,7 +31,7 @@ jobs:
         run: |
             export SDM_ADMIN_TOKEN=${{ secrets.SDM_ADMIN_TOKEN }}
             sdm status
-            sdm admin ssh list
+            # sdm admin ssh list
 
       - name: Deploy to customer1
         if: contains(github.event.head_commit.message, '[customer1]')
