@@ -49,4 +49,3 @@ jobs:
             git config --global url.\"https://github.com/\".insteadOf git@github.com:
             bench get-app https://github.com/oun-qa/malek_app.git
           "
-```
