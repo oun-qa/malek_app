@@ -41,4 +41,5 @@ jobs:
           sdm connect erp_demo
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
           sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app git@github.com:oun-qa/malek_app.git"
