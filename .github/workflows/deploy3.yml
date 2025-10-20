@@ -33,15 +33,17 @@ jobs:
           sdm status
           # cat /var/tmp/sdm.log
 
-      - name: Connect and deploy (Customer 1 )
+      - name: Connect and deploy (Customer 1)
         # if: contains(github.event.head_commit.message, '[customer1]')
         run: |
           sdm connect erp_demo
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
           
-          mkdir -p ~/.ssh
-          sdm ssh --config > ~/.ssh/config
+          # The following line was causing issues; sdm ssh handles configuration internally.
+          # mkdir -p ~/.ssh
+          # sdm ssh --config > ~/.ssh/config
+          
           sdm ssh erp_demo "
             set -e
             mkdir -p ~/.ssh
