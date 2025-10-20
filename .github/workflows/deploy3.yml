@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download StrongDM CLI
-        run: | 
+        run: |
           curl -Lso sdm.zip "https://app.strongdm.com/releases/cli/linux/oun-for-consultation-and-support"
           unzip sdm.zip
           rm sdm.zip
@@ -27,21 +27,22 @@ jobs:
         run: |
           sudo ./sdm install --nologin
 
-      - name: Test StrongDM CLI 
+      - name: Test StrongDM CLI
         run: |
           sdm login --admin-token=${{ secrets.SDM_ADMIN_TOKEN }}
           sdm status
           # cat /var/tmp/sdm.log
 
-      - name: Connect and deploy (Customer 1)
+      - name: Connect and deploy (Customer 1 )
         # if: contains(github.event.head_commit.message, '[customer1]')
         run: |
           sdm connect erp_demo
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
           
+          mkdir -p ~/.ssh
           sdm ssh --config > ~/.ssh/config
-          sdm ssh erp_demo " 
+          sdm ssh erp_demo "
             set -e
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
