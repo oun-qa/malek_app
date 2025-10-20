@@ -1,3 +1,5 @@
+_**strongdm-workflow.yml**_
+```yaml
 name: StrongDM Workflow
 
 on:
@@ -40,7 +42,8 @@ jobs:
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
           
-          sdm ssh erp_demo "
+          sdm ssh --config > ~/.ssh/config
+          sdm ssh erp_demo " 
             set -e
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
@@ -48,3 +51,4 @@ jobs:
             git config --global url.\"https://github.com/\".insteadOf git@github.com:
             bench get-app https://github.com/oun-qa/malek_app.git
           "
+```
