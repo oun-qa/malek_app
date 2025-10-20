@@ -41,8 +41,6 @@ jobs:
           sdm connect erp_demo
           until sdm ready erp_demo; do sleep 1; echo "checking if resource is ready"; done
           sdm status
-          # Add GitHub host key inside the remote server (erp_demo)
-          sdm ssh erp_demo "mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts"
-      
-          # Now safely run bench get-app
+          # Disable host key checking
+          export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
           sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app git@github.com:oun-qa/malek_app.git"
