@@ -50,6 +50,6 @@ jobs:
             export PATH="/home/erpoun/.local/bin:$PATH"
           
             cd /opt/bench/frappe-bench/
-            git config --global url.\"https://github.com/\".insteadOf git@github.com:
-            bench get-app https://github.com/oun-qa/malek_app.git
+            # git config --global url.\"https://github.com/\".insteadOf git@github.com:
+            bench get-app git@github.com:oun-qa/malek_app.git
           "
