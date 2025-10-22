@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SDM_DOCKERIZED: true
+      # SDM_DOCKERIZED: true
       SDM_VERBOSE: true
       SDM_DISABLE_UPDATE: true
 
