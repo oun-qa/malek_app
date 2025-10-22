@@ -44,5 +44,11 @@ jobs:
           echo "[127.0.0.1]:10002 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDzwkDVsJY0Hf9injNAIkmzfAwU76fWVuF4rpa0dXut7fJqHQBBmrGENcTvuogWa5pa4E/tYry1DCGp6tefz+fJpmUNh2PJ2z0Js/TK1WWiP3Dd99Y4wNGahah/sqFkQrDxmJ7tTqPmhMV9fQyCM4e8+2zh1QbkJroZMEkSI/UzSQ==" >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
           
-          sdm ssh erp_demo "cd /opt/bench/frappe-bench/ && bench get-app git@github.com:oun-qa/malek_app.git" 
-
+          sdm ssh erp_demo "
+            set -e
+            # This line was removed as git config uses HTTPS for github.com
+            # ssh-keyscan github.com >> ~/.ssh/known_hosts
+            cd /opt/bench/frappe-bench/
+            git config --global url.\"https://github.com/\".insteadOf git@github.com:
+            /home/erpoun/.local/bin/bench get-app https://github.com/oun-qa/malek_app.git
+          "
