@@ -51,5 +51,5 @@ jobs:
           
             cd /opt/bench/frappe-bench/
             git config --global url.\"https://github.com/\".insteadOf git@github.com:
-            /home/erpoun/.local/bin/bench get-app https://github.com/oun-qa/malek_app.git
+            bench get-app https://github.com/oun-qa/malek_app.git
           "
