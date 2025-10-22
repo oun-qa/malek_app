@@ -33,7 +33,7 @@ jobs:
           sdm status
           # cat /var/tmp/sdm.log
 
-      - name: Connect and deploy (Customer 1 )
+      - name: Connect and deploy (Customer 1)
         # if: contains(github.event.head_commit.message, '[customer1]')
         run: |
           sdm connect erp_demo
@@ -46,9 +46,8 @@ jobs:
           
           sdm ssh erp_demo "
             set -e
-            # The following mkdir -p ~/.ssh is redundant here as it's done above
-            # mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            # Source the Frappe Bench environment to make 'bench' command available
+            source /opt/bench/frappe-bench/env/bin/activate
             cd /opt/bench/frappe-bench/
             git config --global url.\"https://github.com/\".insteadOf git@github.com:
             bench get-app https://github.com/oun-qa/malek_app.git
