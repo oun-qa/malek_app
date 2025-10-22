@@ -50,7 +50,7 @@ jobs:
             export PATH="/opt/bench/frappe-bench/env/bin:$PATH"
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             cd /opt/bench/frappe-bench/
-            ls apps/
+            which bench
             git config --global url.\"https://github.com/\".insteadOf git@github.com:
             bench get-app https://github.com/oun-qa/malek_app.git
           "
